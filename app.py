@@ -1,9 +1,11 @@
 # By Tymek Gryszkalis 2022
 #
 # Tkinter version 8.6.12
+
 from tkinter import *
 import pdf_generator
 
+# Techincal constants
 ENTRY_FONT = "Arial 12"
 SMALL_WIDTH = 30
 BIG_WIDTH = 100
@@ -11,9 +13,9 @@ BIG_HEIGHT = 6
 
 option = "n"
 hour = "19:00"
-pronouns = "m"
+pronoun = "m"
 
-def selectOption(choice):
+def typeOption(choice):
     global option
     if choice == "Wiadomości Studenckie":
         option = "n"
@@ -26,6 +28,15 @@ def selectOption(choice):
 def hourOption(choice):
     global hour
     hour = choice
+
+def pronounOption(choice):
+    global pronoun
+    if choice == "\"Przygotował\"":
+        pronoun = "m"
+    elif choice == "\"Przygotowała\"":
+        pronoun = "f"
+    elif choice == "\"Przygotowałx\"":
+        pronoun = "o"
 
 def clearFrame(frame):
     for widget in frame.winfo_children():
@@ -43,7 +54,7 @@ def generate():
         "type" : option,
         "news" : [data_news1, data_news2, data_news3],
         "author" : data_author,
-        "pronouns" : pronouns,
+        "pronouns" : pronoun,
         "date" : data_date
     }
 
@@ -55,27 +66,39 @@ def generate():
         hash["time"] = hour
     
     success = Label(com, text = "Wygenerowano!")
+    failure = Label(com, text = "Błąd! Zamknij PDF-y z wiadomościami przed generowaniem kolejnych!")
     if pdf_generator.genPdf(hash):
         success.pack()
+    else:
+        failure.pack()
+
 
 def newsField():
     clearFrame(frame)
     clearFrame(com)
 
-    label_text = Label(frame, text = "Autor:", font = "Arial 12")
+    label_text = Label(frame, text = "Autor:", font = ENTRY_FONT)
     label_text.pack()
     global author_window
     author_window = Entry(frame, width = SMALL_WIDTH, font = ENTRY_FONT)
     author_window.pack()
 
-    label_text = Label(frame, text = "Data:", font = "Arial 12")
+    label_text = Label(frame, text = "Data:", font = ENTRY_FONT)
     label_text.pack()
     global date_window
     date_window = Entry(frame, width = SMALL_WIDTH, font = ENTRY_FONT)
     date_window.pack()
 
+    label_text = Label(frame, text = "Zaimek", font = ENTRY_FONT)
+    label_text.pack()
+    pronoun_options = ["\"Przygotował\"", "\"Przygotowała\"", "\"Przygotowałx\""]
+    pronoun_var = StringVar()
+    pronoun_var.set(pronoun_options[0])
+    pronoun_widget = OptionMenu(frame, pronoun_var, *pronoun_options, command = pronounOption)
+    pronoun_widget.pack()
+
     if option == "n":
-        label_text = Label(frame, text = "Godzina", font = "Arial 12")
+        label_text = Label(frame, text = "Godzina", font = ENTRY_FONT)
         label_text.pack()
         hour_options = ["19:00", "19:30"]
         hour_var = StringVar()
@@ -118,7 +141,7 @@ header.pack()
 news_options = ["Wiadomości Studenckie", "Kurier Kulturalny", "Wiadomości Sportowe"]
 options_var = StringVar()
 options_var.set(news_options[0])
-options_widget = OptionMenu(root, options_var, *news_options, command = selectOption)
+options_widget = OptionMenu(root, options_var, *news_options, command = typeOption)
 options_widget.pack()
 
 frame = Frame(root)
