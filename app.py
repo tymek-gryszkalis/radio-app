@@ -3,30 +3,38 @@ from tkinter import *
 option = "n"
 
 def selectOption(choice):
+    global option
     if choice == "Wiadomości Studenckie":
         option = "n"
-        newsField()
     elif choice == "Kurier Kulturalny":
         option = "c"
-        notNewsField()
     elif choice == "Wiadomości Sportowe":
         option = "s"
-        notNewsField()
+    newsField()
 
 def newsField():
     for widget in frame.winfo_children():
             widget.destroy()
-    for i in range(3):
-        inp_title = Entry(frame, width = "10", font = "Arial 12")
-        inp_news = Text(frame, width = "100", height = "5", font = "Arial 12")
-        inp_title.pack()
-        inp_news.pack()
 
-def notNewsField():
-    for widget in frame.winfo_children():
-            widget.destroy()
+    author_text = Label(frame, text = "Autorstwa:", font = "Arial 12")
+    author_text.pack()
+    author_window = Entry(frame, width = "10", font = "Arial 12")
+    author_window.pack()
+
+    if option == "n":
+        hour_text = Label(frame, text = "Godzina", font = "Arial 12")
+        hour_text.pack()
+        hour_options = ["19:00", "19:30"]
+        hour_var = StringVar()
+        hour_var.set(hour_options[0])
+        hour_widget = OptionMenu(frame, hour_var, *hour_options)
+        hour_widget.pack()
+
     for i in range(3):
         inp_news = Text(frame, width = "100", height = "5", font = "Arial 12")
+        if option == "n":
+            inp_title = Entry(frame, width = "10", font = "Arial 12")
+            inp_title.pack()
         inp_news.pack()
 
 root = Tk()
