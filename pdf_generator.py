@@ -1,6 +1,6 @@
 # By Tymek Gryszkalis 2022
 # 
-# Typy:
+# Types:
 # n - wiadomości studenckie
 # c - kurier kulturalny
 # s - wiadomości sportowe
@@ -8,7 +8,9 @@
 # Pronouns:
 # m - male
 # f - female
-# o - other (x) 
+# o - other (x)
+# 
+# Pylatex version 1.4.1 
 
 from pylatex import Document, PageStyle, Head, MiniPage, LargeText, Figure, LineBreak, Description, Command
 from pylatex.utils import bold, italic
@@ -77,7 +79,6 @@ def latexNewsGen(doc, hash):
 
 # generating ending of the document
 def latexEndingGen(doc, outro, hash, filetit):
-    latexBigBreak(doc)
     doc.append(italic(outro))
     doc.generate_pdf(hash["date"] + " - " + filetit, clean_tex=False)
 
