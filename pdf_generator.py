@@ -77,10 +77,20 @@ def latexNewsGen(doc, hash):
         for i in range(len(hash["news"])):
             desc.add_item(str(i + 1) + ".", Command('texttt', (hash["news"][i])))
 
+# generating news headers
+def latexHeadersGen(doc, intro, hash):
+    doc.append(italic(intro))
+    doc.append("\n\n")
+    for i in range(len(hash["headers"])):
+        hd = hash["headers"][i].upper()
+        doc.append(bold(str(i + 1) + ". " + hd + "\n"))
+    doc.append(italic("\nWiadomości przedstawi: [Osoba]"))
+
 # generating ending of the document
 def latexEndingGen(doc, outro, hash, filetit):
     doc.append(italic(outro))
-    doc.generate_pdf(hash["date"] + " - " + filetit, clean_tex=False)
+    dt = "" if hash["date"] == '' else hash["date"] + " - "
+    doc.generate_pdf(dt + filetit, clean_tex=False)
 
 # main pdf generator
 def genPdf(main_hash):
@@ -92,44 +102,8 @@ def genPdf(main_hash):
     filetit = res["filetit"]
 
     # main latex code generating
-    if __name__ == '__main__':
-
-        doc = latexBegGen(title)
-        
-        # generate intro and headers if needed
-        if main_hash["type"] == "n":
-            doc.append(italic(intro))
-            doc.append("\n\n")
-            for i in range(len(main_hash["headers"])):
-                doc.append(bold(str(i + 1) + ". " + main_hash["headers"][i] + "\n"))
-            doc.append(italic("\nWiadomości przedstawi: [Osoba]"))
-
-        latexNewsGen(doc, main_hash)
-        latexEndingGen(doc, outro, main_hash, filetit)
-
-test_news_hash = {
-    "type" : "n",
-    "headers" : ["Nagłówek A", "Nagłówek B", "Nagłówek C"],
-    "news" : [
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sollicitudin mattis magna. In et luctus quam. Morbi scelerisque eu massa in sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec porttitor felis. Mauris sit amet purus est. Curabitur augue sapien, mollis vel risus venenatis, egestas tristique urna. Vestibulum tristique sollicitudin mi ut luctus.",
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sollicitudin mattis magna. In et luctus quam. Morbi scelerisque eu massa in sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec porttitor felis. Mauris sit amet purus est. Curabitur augue sapien, mollis vel risus venenatis, egestas tristique urna. Vestibulum tristique sollicitudin mi ut luctus.",
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sollicitudin mattis magna. In et luctus quam. Morbi scelerisque eu massa in sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec porttitor felis. Mauris sit amet purus est. Curabitur augue sapien, mollis vel risus venenatis, egestas tristique urna. Vestibulum tristique sollicitudin mi ut luctus."],
-    "author" : "Tymi Gryszkalis",
-    "time" : "19:30",
-    "pronouns" : "m",
-    "date" : "04.20"
-}
-
-test_nnews_hash = {
-    "type" : "c",
-    "news" : [
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sollicitudin mattis magna. In et luctus quam. Morbi scelerisque eu massa in sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec porttitor felis. Mauris sit amet purus est. Curabitur augue sapien, mollis vel risus venenatis, egestas tristique urna. Vestibulum tristique sollicitudin mi ut luctus.",
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sollicitudin mattis magna. In et luctus quam. Morbi scelerisque eu massa in sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec porttitor felis. Mauris sit amet purus est. Curabitur augue sapien, mollis vel risus venenatis, egestas tristique urna. Vestibulum tristique sollicitudin mi ut luctus.",
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sollicitudin mattis magna. In et luctus quam. Morbi scelerisque eu massa in sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec porttitor felis. Mauris sit amet purus est. Curabitur augue sapien, mollis vel risus venenatis, egestas tristique urna. Vestibulum tristique sollicitudin mi ut luctus."],
-    "author" : "Tyma Gryszkalisa",
-    "pronouns" : "o",
-    "date" : "06.09.22"
-}
-
-genPdf(test_news_hash)
-genPdf(test_nnews_hash)
+    doc = latexBegGen(title)
+    if main_hash["type"] == "n":
+        latexHeadersGen(doc, intro, main_hash)
+    latexNewsGen(doc, main_hash)
+    latexEndingGen(doc, outro, main_hash, filetit)
