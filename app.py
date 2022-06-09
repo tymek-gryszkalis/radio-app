@@ -5,16 +5,20 @@
 from tkinter import *
 import pdf_generator
 
-# Techincal constants
-ENTRY_FONT = "Arial 12"
+# Visual constants (feel the css vibe)
+ENTRY_FONT = "Courier 12"
+LABEL_FONT = "Arial 12"
+HEADER_FONT = "Arial 24 bold"
 SMALL_WIDTH = 30
 BIG_WIDTH = 100
 BIG_HEIGHT = 6
 
+# Vars to pass on
 option = "n"
 hour = "19:00"
 pronoun = "m"
 
+# fuction for type optionbox
 def typeOption(choice):
     global option
     if choice == "Wiadomości Studenckie":
@@ -25,10 +29,12 @@ def typeOption(choice):
         option = "s"
     newsField()
 
+# function for hour optionbox
 def hourOption(choice):
     global hour
     hour = choice
 
+# function for pronouns optionbox
 def pronounOption(choice):
     global pronoun
     if choice == "\"Przygotował\"":
@@ -38,11 +44,14 @@ def pronounOption(choice):
     elif choice == "\"Przygotowałx\"":
         pronoun = "o"
 
+# quick frame clear
 def clearFrame(frame):
     for widget in frame.winfo_children():
             widget.destroy()
 
+# pdf generating
 def generate():
+    # making hash
     clearFrame(com)
     data_author = author_window.get()
     data_date = date_window.get()
@@ -65,6 +74,7 @@ def generate():
         hash["headers"] = [data_title1, data_title2, data_title3]
         hash["time"] = hour
     
+    # generating and catching success or failure
     success = Label(com, text = "Wygenerowano!")
     failure = Label(com, text = "Błąd! Zamknij PDF-y z wiadomościami przed generowaniem kolejnych!")
     if pdf_generator.genPdf(hash):
@@ -72,24 +82,24 @@ def generate():
     else:
         failure.pack()
 
-
+# generating fields for news (depending on the type)
 def newsField():
     clearFrame(frame)
     clearFrame(com)
 
-    label_text = Label(frame, text = "Autor:", font = ENTRY_FONT)
+    label_text = Label(frame, text = "Autor:", font = LABEL_FONT)
     label_text.pack()
     global author_window
     author_window = Entry(frame, width = SMALL_WIDTH, font = ENTRY_FONT)
     author_window.pack()
 
-    label_text = Label(frame, text = "Data:", font = ENTRY_FONT)
+    label_text = Label(frame, text = "Data:", font = LABEL_FONT)
     label_text.pack()
     global date_window
     date_window = Entry(frame, width = SMALL_WIDTH, font = ENTRY_FONT)
     date_window.pack()
 
-    label_text = Label(frame, text = "Zaimek", font = ENTRY_FONT)
+    label_text = Label(frame, text = "Zaimek:", font = LABEL_FONT)
     label_text.pack()
     pronoun_options = ["\"Przygotował\"", "\"Przygotowała\"", "\"Przygotowałx\""]
     pronoun_var = StringVar()
@@ -97,8 +107,9 @@ def newsField():
     pronoun_widget = OptionMenu(frame, pronoun_var, *pronoun_options, command = pronounOption)
     pronoun_widget.pack()
 
+    # Ugly as heck, but what can you do (seiously if someone knows what can you do please let me know I hate this piece of code)
     if option == "n":
-        label_text = Label(frame, text = "Godzina", font = ENTRY_FONT)
+        label_text = Label(frame, text = "Godzina:", font = LABEL_FONT)
         label_text.pack()
         hour_options = ["19:00", "19:30"]
         hour_var = StringVar()
@@ -130,12 +141,13 @@ def newsField():
     inp_news3 = Text(frame, width = BIG_WIDTH, height = BIG_HEIGHT, font = ENTRY_FONT)
     inp_news3.pack()
 
+# setting up the 
 root = Tk()
 root.geometry("1280x720")
 root.iconbitmap('icon.ico')
 root.title("Newseser")
 
-header = Label(root, text = "Generator newsów", font = "Arial 12 bold")
+header = Label(root, text = "Generator newsów", font = HEADER_FONT)
 header.pack()
 
 news_options = ["Wiadomości Studenckie", "Kurier Kulturalny", "Wiadomości Sportowe"]
