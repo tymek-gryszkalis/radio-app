@@ -1,75 +1,113 @@
-from pylatex import Document, PageStyle, Head, MiniPage, Foot, LargeText, Figure, LineBreak, Description, simple_page_number, Command
+# By Tymek Gryszkalis 2022
+# 
+# Typy:
+# n - wiadomości studenckie
+# c - kurier kulturalny
+# s - wiadomości sportowe
+# 
+# Pronouns:
+# m - male
+# f - female
+# o - other (x) 
+
+from pylatex import Document, PageStyle, Head, MiniPage, LargeText, Figure, LineBreak, Description, Command
 from pylatex.utils import bold, italic
 
-def getInput():
-    heads = []
-    news = []
-    author = ""
-    hour = ""
-    pronouns = ""
-    for i in range(3):
-        print("Podaj nagłówek nr " + str(i + 1) + ": ")
-        heads.append(input())
-    for i in range(3):
-        print("Podaj newsa nr " + str(i + 1) + ": ")
-        news.append(input())
-    print("Podaj autora: ")
-    author = input()
-    print("Podaj godzinę: ")
-    hour = input()
-    print("Podaj zaimek")
-    pronouns = input()
-    main_hash = {"headers" : heads, "news" : news, "author" : author, "time" : hour, "pronouns" : pronouns}
-
-def genPdf(main_hash):
-    # pick right pronouns
+# returns word ending based on picked pronouns
+def pickPronouns(hash):
     pn = ""
-    if main_hash["pronouns"] == "f":
+    if hash["pronouns"] == "f":
         pn = "a"
-    elif main_hash["pronouns"] == "o":
+    elif hash["pronouns"] == "o":
         pn = "x"
+    return pn
 
+# returns hash of strings with essential componenets for news generating
+def pickElements(hash, type):
+    pn = pickPronouns(hash)
+    toret = {}
+    if type == "n":
+        toret["title"] = "Wiadomości studenckie " + hash["date"]
+        toret["intro"] = "Minęła godzina " + hash["time"] + " więc czas na wiadomości studenckie, a w nich:"
+        toret["outro"] = "Wiadomości przygotował" + pn + " " + hash["author"] + "."
+        toret["filetit"] = "Wiadomości Studenckie"
+    elif type == "s":
+        toret["title"] = "Wiadomości sportowe " + hash["date"]
+        toret["intro"] = ""
+        toret["outro"] = "Wiadomości sportowe przygotował" + pn + " " + hash["author"] + "."
+        toret["filetit"] = "Wiadomości Sportowe"
+    elif type == "c":
+        toret["title"] = "Kurier kulturalny " + hash["date"]
+        toret["intro"] = ""
+        toret["outro"] = "Kuriera kulturalnego przygotował" + pn + " " + hash["author"] + "."
+        toret["filetit"] = "Kurier Kulturalny"
+    return toret
+
+# generates a 5 line break in document
+def latexBigBreak(doc):
+    doc.append(Command('phantom', 'bruh'))
+    for i in range(5):
+        doc.append(LineBreak())
+
+# generating beginning of the document
+def latexBegGen(title):
+    # creating document
+    geometry = {"margin" : "1in"}
+    doc = Document(geometry_options = geometry)
+    Command('documentclass', '10pt', 'doc')
+
+    # creating header (for logo purposes only)
+    header = PageStyle("header")
+    with header.create(Head("R")):
+        header.append(bold("Radio Aktywne"))
+    doc.preamble.append(header)
+    doc.change_document_style("header")
+
+    # centralized minipage for title
+    with doc.create(MiniPage(align='c')):
+        doc.append(LargeText(bold(title)))
+    latexBigBreak(doc)
+    return doc
+
+# generating paragraphs of the document
+def latexNewsGen(doc, hash):
+    with doc.create(Description()) as desc:
+        for i in range(len(hash["news"])):
+            desc.add_item(str(i + 1) + ".", Command('texttt', (hash["news"][i])))
+
+# generating ending of the document
+def latexEndingGen(doc, outro, hash, filetit):
+    latexBigBreak(doc)
+    doc.append(italic(outro))
+    doc.generate_pdf(hash["date"] + " - " + filetit, clean_tex=False)
+
+# main pdf generator
+def genPdf(main_hash):
     # prepare strings
-    title = "Wiadomości studenckie " + main_hash["date"]
-    intro = "Minęła godzina " + main_hash["time"] + " więc czas na wiadomości studenckie, a w nich:\n\n"
-    outro = "\nA wiadomości przygotował" + pn + " " + main_hash["author"] + "."
+    res = pickElements(main_hash, main_hash["type"])
+    title = res["title"]
+    intro = res["intro"]
+    outro = res["outro"]
+    filetit = res["filetit"]
 
     # main latex code generating
     if __name__ == '__main__':
-        # creating document
-        geometry = {"margin" : "1in"}
-        doc = Document(geometry_options = geometry)
-        Command('documentclass', '10pt', 'doc')
 
-        # creating header (for logo purposes only)
-        header = PageStyle("header")
-        with header.create(Head("R")):
-            header.append(bold("Radio Aktywne"))
-        doc.preamble.append(header)
-        doc.change_document_style("header")
+        doc = latexBegGen(title)
+        
+        # generate intro and headers if needed
+        if main_hash["type"] == "n":
+            doc.append(italic(intro))
+            doc.append("\n\n")
+            for i in range(len(main_hash["headers"])):
+                doc.append(bold(str(i + 1) + ". " + main_hash["headers"][i] + "\n"))
+            doc.append(italic("\nWiadomości przedstawi: [Osoba]"))
 
-        # centralized minipage for title
-        with doc.create(MiniPage(align='c')):
-            doc.append(LargeText(bold(title)))
+        latexNewsGen(doc, main_hash)
+        latexEndingGen(doc, outro, main_hash, filetit)
 
-        # generate headers
-        for i in range(5):
-            doc.append(LineBreak())
-        doc.append(italic(intro))
-        for i in range(len(main_hash["headers"])):
-            doc.append(bold(str(i + 1) + ". " + main_hash["headers"][i] + "\n"))
-        doc.append(italic("\nWiadomości przedstawi: [Osoba]"))
-
-        # generate news
-        with doc.create(Description()) as desc:
-            for i in range(len(main_hash["news"])):
-                desc.add_item(str(i + 1) + ".", Command('texttt', (main_hash["news"][i])))
-
-        doc.append(italic(outro))
-
-        doc.generate_pdf('full', clean_tex=False)
-
-testhash = {
+test_news_hash = {
+    "type" : "n",
     "headers" : ["Nagłówek A", "Nagłówek B", "Nagłówek C"],
     "news" : [
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sollicitudin mattis magna. In et luctus quam. Morbi scelerisque eu massa in sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec porttitor felis. Mauris sit amet purus est. Curabitur augue sapien, mollis vel risus venenatis, egestas tristique urna. Vestibulum tristique sollicitudin mi ut luctus.",
@@ -81,4 +119,16 @@ testhash = {
     "date" : "04.20"
 }
 
-genPdf(testhash)
+test_nnews_hash = {
+    "type" : "c",
+    "news" : [
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sollicitudin mattis magna. In et luctus quam. Morbi scelerisque eu massa in sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec porttitor felis. Mauris sit amet purus est. Curabitur augue sapien, mollis vel risus venenatis, egestas tristique urna. Vestibulum tristique sollicitudin mi ut luctus.",
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sollicitudin mattis magna. In et luctus quam. Morbi scelerisque eu massa in sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec porttitor felis. Mauris sit amet purus est. Curabitur augue sapien, mollis vel risus venenatis, egestas tristique urna. Vestibulum tristique sollicitudin mi ut luctus.",
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sollicitudin mattis magna. In et luctus quam. Morbi scelerisque eu massa in sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec porttitor felis. Mauris sit amet purus est. Curabitur augue sapien, mollis vel risus venenatis, egestas tristique urna. Vestibulum tristique sollicitudin mi ut luctus."],
+    "author" : "Tyma Gryszkalisa",
+    "pronouns" : "o",
+    "date" : "06.09.22"
+}
+
+genPdf(test_news_hash)
+genPdf(test_nnews_hash)
