@@ -12,8 +12,9 @@
 # 
 # Pylatex version 1.4.1 
 
-from pylatex import Document, PageStyle, Head, MiniPage, LargeText, Figure, LineBreak, Description, Command
+from pylatex import Document, PageStyle, Head, MiniPage, LargeText, LineBreak, Description, Command, NoEscape, Figure
 from pylatex.utils import bold, italic
+import os
 
 # returns word ending based on picked pronouns
 def pickPronouns(hash):
@@ -59,11 +60,8 @@ def latexBegGen(title):
     Command('documentclass', '10pt', 'doc')
 
     # creating header (for logo purposes only)
-    header = PageStyle("header")
-    with header.create(Head("R")):
-        header.append(bold("Radio Aktywne"))
-    doc.preamble.append(header)
-    doc.change_document_style("header")
+    with doc.create(Figure(position='h')) as logo:
+        logo.add_image("logo.png", width = '50px', placement = "")
 
     # centralized minipage for title
     with doc.create(MiniPage(align='c')):
@@ -90,7 +88,7 @@ def latexHeadersGen(doc, intro, hash):
 def latexEndingGen(doc, outro, hash, filetit):
     doc.append(italic(outro))
     dt = "" if hash["date"] == '' else hash["date"] + " - "
-    doc.generate_pdf(dt + filetit, clean_tex=False)
+    doc.generate_pdf(dt + filetit, clean_tex=True)
 
 # main pdf generator
 def genPdf(main_hash):
@@ -100,10 +98,25 @@ def genPdf(main_hash):
     intro = res["intro"]
     outro = res["outro"]
     filetit = res["filetit"]
+    try:
+        # main latex code generating
+        doc = latexBegGen(title)
+        if main_hash["type"] == "n":
+            latexHeadersGen(doc, intro, main_hash)
+        latexNewsGen(doc, main_hash)
+        latexEndingGen(doc, outro, main_hash, filetit)
+    except UnicodeDecodeError:
+        return 0
+    return 1
 
-    # main latex code generating
-    doc = latexBegGen(title)
-    if main_hash["type"] == "n":
-        latexHeadersGen(doc, intro, main_hash)
-    latexNewsGen(doc, main_hash)
-    latexEndingGen(doc, outro, main_hash, filetit)
+testhash = {
+    "headers" : ["Nagłówek A", "Nagłówek B", "Nagłówek C"],
+    "news" : [
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sollicitudin mattis magna. In et luctus quam. Morbi scelerisque eu massa in sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec porttitor felis. Mauris sit amet purus est. Curabitur augue sapien, mollis vel risus venenatis, egestas tristique urna. Vestibulum tristique sollicitudin mi ut luctus.",
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sollicitudin mattis magna. In et luctus quam. Morbi scelerisque eu massa in sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec porttitor felis. Mauris sit amet purus est. Curabitur augue sapien, mollis vel risus venenatis, egestas tristique urna. Vestibulum tristique sollicitudin mi ut luctus.",
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sollicitudin mattis magna. In et luctus quam. Morbi scelerisque eu massa in sagittis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean nec porttitor felis. Mauris sit amet purus est. Curabitur augue sapien, mollis vel risus venenatis, egestas tristique urna. Vestibulum tristique sollicitudin mi ut luctus."],
+    "author" : "Tymi Gryszkalis",
+    "time" : "19:30",
+    "pronouns" : "m",
+    "date" : "04.20"
+}
