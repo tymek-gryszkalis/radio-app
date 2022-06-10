@@ -144,7 +144,7 @@ def newsField():
 # setting up the 
 root = Tk()
 root.geometry("1280x720")
-root.iconbitmap('icon.ico')
+root.iconbitmap('./resources/icon.ico')
 root.title("Newseser")
 
 header = Label(root, text = "Generator newsów", font = HEADER_FONT)

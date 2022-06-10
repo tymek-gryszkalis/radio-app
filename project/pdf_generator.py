@@ -61,7 +61,7 @@ def latexBegGen(title):
 
     # creating header (for logo purposes only)
     with doc.create(Figure(position='h')) as logo:
-        logo.add_image("logo.png", width = '50px', placement = "")
+        logo.add_image("./resources/logo.png", width = '50px', placement = "")
 
     # centralized minipage for title
     with doc.create(MiniPage(align='c')):
